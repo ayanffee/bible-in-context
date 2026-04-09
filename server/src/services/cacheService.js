@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CACHE_FILE = path.join(__dirname, '../../cache/context-cache.json');
+// On Vercel only /tmp is writable; locally use the server/cache directory
+const CACHE_FILE = process.env.VERCEL
+  ? '/tmp/context-cache.json'
+  : path.join(process.cwd(), 'server', 'cache', 'context-cache.json');
 
 // Layer 1: in-memory
 const memoryCache = new Map();
@@ -25,6 +26,8 @@ function loadFromFile() {
 
 function saveToFile() {
   try {
+    const dir = path.dirname(CACHE_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     const data = Object.fromEntries(memoryCache);
     fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2));
   } catch (err) {
