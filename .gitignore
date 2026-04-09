@@ -1,0 +1,10 @@
+node_modules/
+.claude/
+server/.env
+server/cache/context-cache.json
+server/data/
+client/dist/
+.DS_Store
+*.db
+*.db-shm
+*.db-wal
