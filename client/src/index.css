@@ -320,6 +320,8 @@ select:focus { border-color: #c4915a; }
   border-radius: 0 0 8px 8px;
   padding: 16px 20px 18px 20px;
   animation: slideDown 0.2s ease-out;
+  max-height: 360px;
+  overflow-y: auto;
 }
 
 @keyframes slideDown {
@@ -2343,7 +2345,7 @@ select:focus { border-color: #c4915a; }
   transition: background 0.15s, transform 0.1s;
   line-height: 1;
 }
-.chat-toggle-btn:hover { background: var(--surface-hover); transform: scale(1.1); }
+.chat-toggle-btn:hover { background: var(--bg-secondary); transform: scale(1.1); }
 .chat-toggle-btn.active { background: var(--accent); }
 
 .chat-overlay {
@@ -2365,7 +2367,7 @@ select:focus { border-color: #c4915a; }
   right: 0;
   bottom: 90px; /* above music player */
   width: 340px;
-  background: var(--surface);
+  background: var(--bg-card);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -2405,7 +2407,7 @@ select:focus { border-color: #c4915a; }
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  background: var(--surface);
+  background: var(--bg-card);
 }
 .chat-header-left {
   display: flex;
@@ -2442,7 +2444,7 @@ select:focus { border-color: #c4915a; }
   transition: background 0.15s, color 0.15s;
 }
 .chat-clear-btn:hover, .chat-close-btn:hover {
-  background: var(--surface-hover);
+  background: var(--bg-secondary);
   color: var(--text-primary);
 }
 
@@ -2471,7 +2473,7 @@ select:focus { border-color: #c4915a; }
   margin-top: 2px;
 }
 .chat-bubble-text {
-  background: var(--surface-raised, #2a2218);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   padding: 10px 13px;
   border-radius: 14px;
@@ -2526,7 +2528,7 @@ select:focus { border-color: #c4915a; }
   gap: 8px;
   padding: 10px 12px;
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--bg-card);
   flex-shrink: 0;
 }
 .chat-input {
