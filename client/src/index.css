@@ -79,22 +79,23 @@ body {
   display: flex;
   flex: 1;
   min-height: 0;
+  height: calc(100vh - 64px - 56px); /* viewport minus header and music player bar */
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
   max-width: 780px;
   margin: 0 auto;
-  padding: 32px 20px 80px;
+  padding: 32px 20px 48px;
   width: 100%;
+  overflow-y: auto;
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
   .bible-ask-layout {
-    align-items: flex-start;
-  }
-  .main-content {
-    min-width: 0;
+    align-items: stretch;
   }
 }
 
@@ -605,10 +606,6 @@ select:focus { border-color: #c4915a; }
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 
-/* ── Main content bottom padding for music player ── */
-.main-content {
-  padding-bottom: 100px; /* enough room above collapsed music player */
-}
 
 /* ── Sidebar Toggle Button ── */
 .sidebar-toggle-btn {
@@ -2383,11 +2380,11 @@ select:focus { border-color: #c4915a; }
 /* Desktop: inline sidebar next to the Bible */
 @media (min-width: 1024px) {
   .chat-panel {
-    position: sticky;
-    top: 64px;
+    position: relative;
+    top: auto;
     right: auto;
     bottom: auto;
-    height: calc(100vh - 64px - 90px);
+    height: 100%;
     width: 340px;
     flex-shrink: 0;
     transform: none !important;
