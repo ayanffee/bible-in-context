@@ -2479,8 +2479,14 @@ select:focus { border-color: #c4915a; }
   line-height: 1.55;
   max-width: 260px;
   word-wrap: break-word;
-  white-space: pre-wrap;
+  white-space: normal;
 }
+.chat-bubble-text p { margin: 0 0 6px; }
+.chat-bubble-text p:last-child { margin-bottom: 0; }
+.chat-bubble-text ul, .chat-bubble-text ol { padding-left: 16px; margin: 4px 0; }
+.chat-bubble-text li { margin-bottom: 2px; }
+.chat-bubble-text strong { font-weight: 700; }
+.chat-bubble-text em { font-style: italic; }
 .chat-bubble.user .chat-bubble-text {
   background: var(--accent);
   color: #fff;

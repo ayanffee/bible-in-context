@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
 
 const SUGGESTED = [
   'Who were the Pharisees?',
@@ -154,7 +155,7 @@ export default function ChatPanel({ open, onClose }) {
             <div key={i} className={`chat-bubble ${msg.role}`}>
               {msg.role === 'assistant' && <span className="chat-avatar">📖</span>}
               <div className="chat-bubble-text">
-                {msg.content}
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
                 {msg.streaming && <span className="chat-cursor">▌</span>}
               </div>
             </div>
