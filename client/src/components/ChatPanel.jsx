@@ -17,7 +17,7 @@ export default function ChatPanel({ open, onClose }) {
   ])
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
-  const messagesEndRef = useRef(null)
+  const messagesContainerRef = useRef(null)
   const inputRef = useRef(null)
   const abortRef = useRef(null)
 
@@ -28,7 +28,8 @@ export default function ChatPanel({ open, onClose }) {
   }, [open])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = messagesContainerRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [messages])
 
   const sendMessage = useCallback(async (text) => {
@@ -148,7 +149,7 @@ export default function ChatPanel({ open, onClose }) {
           </div>
         </div>
 
-        <div className="chat-messages">
+        <div className="chat-messages" ref={messagesContainerRef}>
           {messages.map((msg, i) => (
             <div key={i} className={`chat-bubble ${msg.role}`}>
               {msg.role === 'assistant' && <span className="chat-avatar">📖</span>}
@@ -158,7 +159,6 @@ export default function ChatPanel({ open, onClose }) {
               </div>
             </div>
           ))}
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Suggested questions — only show when fresh */}
