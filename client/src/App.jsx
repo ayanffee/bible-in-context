@@ -263,7 +263,7 @@ export default function App() {
           )}
         </main>
 
-        <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+        <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} onNavigate={handleNavigate} />
       </div>
 
       <MusicPlayer />

@@ -2487,6 +2487,21 @@ select:focus { border-color: #c4915a; }
 .chat-bubble-text li { margin-bottom: 2px; }
 .chat-bubble-text strong { font-weight: 700; }
 .chat-bubble-text em { font-style: italic; }
+
+.verse-ref-link {
+  background: none;
+  border: none;
+  padding: 0 1px;
+  color: var(--accent-light);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline dotted;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.verse-ref-link:hover { color: var(--accent); }
+.chat-bubble.user .verse-ref-link { color: rgba(255,255,255,0.85); }
+.chat-bubble.user .verse-ref-link:hover { color: #fff; }
 .chat-bubble.user .chat-bubble-text {
   background: var(--accent);
   color: #fff;

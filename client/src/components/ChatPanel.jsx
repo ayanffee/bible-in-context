@@ -1,5 +1,52 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { BIBLE_BOOKS } from '../utils/bibleBooks.js'
+
+// Book name -> book object lookup (lowercase keys)
+const BOOK_MAP = {}
+BIBLE_BOOKS.forEach(b => { BOOK_MAP[b.name.toLowerCase()] = b })
+BOOK_MAP['psalm'] = BOOK_MAP['psalms']
+BOOK_MAP['song of songs'] = BOOK_MAP['song of solomon']
+
+// Matches: optional "1/2/3 " prefix, one-or-two capitalised words, chapter, optional :verse
+const VERSE_RE = /\b([1-3]\s+)?([A-Z][a-z]+(?:\s+(?:of\s+)?[A-Z][a-z]+)?)\s+(\d+)(?::(\d+)(?:-\d+)?)?/g
+
+function injectVerseLinks(text, onNavigate) {
+  const parts = []
+  let last = 0
+  VERSE_RE.lastIndex = 0
+  let m
+  while ((m = VERSE_RE.exec(text)) !== null) {
+    const [full, prefix, word, ch] = m
+    const key = ((prefix ? prefix.trim() + ' ' : '') + word).toLowerCase()
+    const book = BOOK_MAP[key]
+    if (!book) continue
+    if (m.index > last) parts.push(text.slice(last, m.index))
+    const bookId = book.id
+    const chapter = +ch
+    parts.push(
+      <button key={m.index} className="verse-ref-link" onClick={() => onNavigate(bookId, chapter)}>
+        {full}
+      </button>
+    )
+    last = m.index + full.length
+  }
+  if (last < text.length) parts.push(text.slice(last))
+  return parts.length ? parts : text
+}
+
+function processChildren(children, onNavigate) {
+  if (typeof children === 'string') return injectVerseLinks(children, onNavigate)
+  if (!Array.isArray(children)) return children
+  return children.flatMap((c, i) => {
+    if (typeof c !== 'string') return [c]
+    const result = injectVerseLinks(c, onNavigate)
+    if (typeof result === 'string') return [result]
+    return result.map((part, j) =>
+      typeof part === 'string' ? <span key={`${i}-${j}`}>{part}</span> : part
+    )
+  })
+}
 
 const SUGGESTED = [
   'Who were the Pharisees?',
@@ -9,7 +56,7 @@ const SUGGESTED = [
   'Who wrote the book of John?',
 ]
 
-export default function ChatPanel({ open, onClose }) {
+export default function ChatPanel({ open, onClose, onNavigate }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -22,10 +69,19 @@ export default function ChatPanel({ open, onClose }) {
   const inputRef = useRef(null)
   const abortRef = useRef(null)
 
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100)
+  const mdComponents = useMemo(() => {
+    if (!onNavigate) return {}
+    const wrap = children => processChildren(children, onNavigate)
+    return {
+      p:      ({ children }) => <p>{wrap(children)}</p>,
+      li:     ({ children }) => <li>{wrap(children)}</li>,
+      strong: ({ children }) => <strong>{wrap(children)}</strong>,
+      em:     ({ children }) => <em>{wrap(children)}</em>,
     }
+  }, [onNavigate])
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 100)
   }, [open])
 
   useEffect(() => {
@@ -42,17 +98,14 @@ export default function ChatPanel({ open, onClose }) {
     const updatedMessages = [...messages, userMsg]
     setMessages(updatedMessages)
     setStreaming(true)
-
-    // Add empty assistant message to stream into
     setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }])
 
     try {
       const controller = new AbortController()
       abortRef.current = controller
 
-      // Build the messages array for the API (exclude the welcome message for API calls)
       const apiMessages = updatedMessages
-        .filter((_, i) => i > 0 || updatedMessages[0].role !== 'assistant') // skip system welcome
+        .filter((_, i) => i > 0 || updatedMessages[0].role !== 'assistant')
         .map(m => ({ role: m.role, content: m.content }))
 
       const res = await fetch('/api/chat/stream', {
@@ -92,7 +145,6 @@ export default function ChatPanel({ open, onClose }) {
         }
       }
 
-      // Finalize — remove streaming flag
       setMessages(prev => {
         const copy = [...prev]
         copy[copy.length - 1] = { role: 'assistant', content: fullText, streaming: false }
@@ -102,11 +154,7 @@ export default function ChatPanel({ open, onClose }) {
       if (err.name !== 'AbortError') {
         setMessages(prev => {
           const copy = [...prev]
-          copy[copy.length - 1] = {
-            role: 'assistant',
-            content: 'Sorry, something went wrong. Please try again.',
-            streaming: false,
-          }
+          copy[copy.length - 1] = { role: 'assistant', content: 'Sorry, something went wrong. Please try again.', streaming: false }
           return copy
         })
       }
@@ -117,22 +165,15 @@ export default function ChatPanel({ open, onClose }) {
   }, [input, messages, streaming])
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
   const clearChat = () => {
-    setMessages([{
-      role: 'assistant',
-      content: '📖 Chat cleared! Ask me anything about the Bible.',
-    }])
+    setMessages([{ role: 'assistant', content: '📖 Chat cleared! Ask me anything about the Bible.' }])
   }
 
   return (
     <>
-      {/* Overlay for mobile */}
       {open && <div className="chat-overlay" onClick={onClose} />}
 
       <div className={`chat-panel ${open ? 'open' : ''}`}>
@@ -155,14 +196,13 @@ export default function ChatPanel({ open, onClose }) {
             <div key={i} className={`chat-bubble ${msg.role}`}>
               {msg.role === 'assistant' && <span className="chat-avatar">📖</span>}
               <div className="chat-bubble-text">
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                <ReactMarkdown components={mdComponents}>{msg.content}</ReactMarkdown>
                 {msg.streaming && <span className="chat-cursor">▌</span>}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Suggested questions — only show when fresh */}
         {messages.length <= 1 && (
           <div className="chat-suggestions">
             {SUGGESTED.map(s => (
